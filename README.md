@@ -4,7 +4,7 @@ Katas de Jacobo
 ## ENTIDADES (clases)
 
 ### 1.- Pokémon
-Representa a una especie de Pokémon (no a uno individual capturado).
+
 ```
 **Atributos:**
 id
