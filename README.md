@@ -54,13 +54,3 @@ efecto_secundario
 **Responsabilidad:**
 Definir cómo ataca un Pokémon.
 ```
-### 5. Evolución
-```
-**Atributos:**
-pokemon_origen
-pokemon_destino
-condicion (nivel, objeto, intercambio, felicidad…)
-
-**Responsabilidad:**
-Definir cuándo y cómo evoluciona un Pokémon.
-```
