@@ -50,7 +50,7 @@ else:
 
 print(f"{atacante.nombre} ataca primero por ser más rápido.\n")
 
-# ---------- LÓGICA DE TURNOS ----------
+# ---------- TURNOS ----------
 turno = 1
 
 while p1.vida > 0 and p2.vida > 0:
