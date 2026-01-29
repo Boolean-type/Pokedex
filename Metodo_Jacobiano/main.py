@@ -11,7 +11,18 @@
 # condiciones victoria o derrota
 # El primer pokemon que se queda a vvida <= 0 pierde
 
-from poke_jacobiano import Pokemon
+from poke_jacobiano import Pokemon,Movimiento
+
+# Movimientos
+Examen_dificil = Movimiento("Examen_dificil", 30)
+Juicio_final = Movimiento("Juicio_final", 25)
+Conocimiento_profundo = Movimiento("Conocimiento_profundo", 20)
+Frikada = Movimiento("Frikada", 35)
+
+Disparo_rapido = Movimiento("Disparo_rapido", 28)
+Ocho_manos = Movimiento("Ocho_manos", 22)
+Finta = Movimiento("Finta", 32)
+Cafe_explosivo = Movimiento("Cafe_explosivo", 50)
 
 
 # ---------- ESCENARIO ----------
@@ -23,7 +34,7 @@ p1 = Pokemon(
     fuerza=35,
     defensa=40,
     velocidad=90,
-    movimientos=["Examen_dificil", "Juicio_final", "Conocimiento_profundo", "Frikada"]
+    movimientos=[Examen_dificil, Juicio_final, Conocimiento_profundo, Frikada]
 )
 
 p2 = Pokemon(
@@ -34,44 +45,30 @@ p2 = Pokemon(
     fuerza=25,
     defensa=17,
     velocidad=180,
-    movimientos=["Disparo_rapido", "Ocho_manos", "Finta", "Cafe_explosivo"]
+    movimientos=[Disparo_rapido, Ocho_manos, Finta, Cafe_explosivo]
 )
 
-print("¡COMIENZA EL COMBATE!")
-print(f"{p1.nombre} vs {p2.nombre}\n")
 
-# ---------- QUIÉN EMPIEZA ----------
+# Quién empieza
 if p1.velocidad >= p2.velocidad:
-    atacante = p1
-    defensor = p2
+    atacante, defensor = p1, p2
 else:
-    atacante = p2
-    defensor = p1
+    atacante, defensor = p2, p1
 
-print(f"{atacante.nombre} ataca primero por ser más rápido.\n")
-
-# ---------- TURNOS ----------
 turno = 1
 
 while p1.vida > 0 and p2.vida > 0:
     print(f"\n--- TURNO {turno} ---")
 
-    # Ataca el primero
     atacante.ejecutar_movimiento(defensor)
-
     if defensor.vida <= 0:
         break
 
-    # Ataca el segundo
     defensor.ejecutar_movimiento(atacante)
-
-    # Siguiente turno
     turno += 1
 
-# ---------- CONDICIÓN DE VICTORIA ----------
-print("\n FIN DEL COMBATE")
-
+print("\n FIN DEL COMBATE ")
 if p1.vida <= 0:
-    print(f"{p1.nombre} ha sido derrotado. ¡{p2.nombre} gana!")
-elif p2.vida <= 0:
-    print(f"{p2.nombre} ha sido derrotado. ¡{p1.nombre} gana!")
+    print(f"{p2.nombre} gana")
+else:
+    print(f"{p1.nombre} gana")
