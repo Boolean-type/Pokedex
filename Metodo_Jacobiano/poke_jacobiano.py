@@ -1,6 +1,5 @@
 import random
 
-
 class Movimiento:
     def __init__(self, nombre, daño_base, tipo_pokemon):
         self._nombre = nombre
@@ -18,6 +17,7 @@ class Movimiento:
         daño -= defensa_objetivo
         return max(0, int(daño))
 
+
 class Pokemon:
     def __init__(self, nombre, nivel, vida, fuerza, defensa, velocidad, movimientos):
         self._nombre = nombre
@@ -27,7 +27,6 @@ class Pokemon:
         self._defensa = defensa
         self._velocidad = velocidad
 
-        # Validar movimientos
         for movimiento in movimientos:
             if movimiento.get_tipo_pokemon() is not self.__class__:
                 raise ValueError(
@@ -35,7 +34,6 @@ class Pokemon:
                 )
 
         self._movimientos = movimientos
-
 
     def get_nombre(self):
         return self._nombre
@@ -49,20 +47,24 @@ class Pokemon:
     def get_velocidad(self):
         return self._velocidad
 
-   
     def set_vida(self, vida):
         self._vida = max(0, vida)
 
-    # -------- COMBATE --------
     def ejecutar_movimiento(self, otro_pokemon):
         movimiento = random.choice(self._movimientos)
-        print(f"{self._nombre} usa {movimiento.get_nombre()} contra {otro_pokemon.get_nombre()}")
         daño = movimiento.calcular_daño(otro_pokemon.get_defensa())
         otro_pokemon.recibir_daño(daño)
 
+        return {
+            "atacante": self._nombre,
+            "movimiento": movimiento.get_nombre(),
+            "daño": daño,
+            "vida_objetivo": otro_pokemon.get_vida()
+        }
+
     def recibir_daño(self, daño):
         self.set_vida(self._vida - daño)
-        print(f"{self._nombre} recibe {daño} de daño. Vida restante: {self._vida}")
+
 
 class PokemonOscuridad(Pokemon):
     pass
@@ -70,3 +72,25 @@ class PokemonOscuridad(Pokemon):
 
 class PokemonRayo(Pokemon):
     pass
+
+
+class Combate:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+
+    def turno(self):
+        if self.p1.get_velocidad() >= self.p2.get_velocidad():
+            atacante, defensor = self.p1, self.p2
+        else:
+            atacante, defensor = self.p2, self.p1
+
+        resultado = atacante.ejecutar_movimiento(defensor)
+
+        return {
+            "resultado_turno": resultado,
+            "vidas": {
+                self.p1.get_nombre(): self.p1.get_vida(),
+                self.p2.get_nombre(): self.p2.get_vida()
+            }
+        }

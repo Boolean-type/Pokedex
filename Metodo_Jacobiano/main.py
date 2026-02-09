@@ -1,57 +1,78 @@
+from fastapi import FastAPI, HTTPException
 from poke_jacobiano import (
     Movimiento,
     PokemonOscuridad,
-    PokemonRayo
+    PokemonRayo,
+    Combate
 )
 
-# Movimientos Oscuridad
-Examen_dificil = Movimiento("Examen_dificil", 30, PokemonOscuridad)
-Juicio_final = Movimiento("Juicio_final", 25, PokemonOscuridad)
-Conocimiento_profundo = Movimiento("Conocimiento_profundo", 20, PokemonOscuridad)
-Frikada = Movimiento("Frikada", 35, PokemonOscuridad)
+app = FastAPI()
 
-# Movimientos Rayo
-Disparo_rapido = Movimiento("Disparo_rapido", 28, PokemonRayo)
-Ocho_manos = Movimiento("Ocho_manos", 22, PokemonRayo)
-Finta = Movimiento("Finta", 32, PokemonRayo)
-Cafe_explosivo = Movimiento("Cafe_explosivo", 50, PokemonRayo)
+pokemons = {}
+combate_actual = None
 
-
-p1 = PokemonOscuridad(
-    nombre="Jacobo",
-    nivel=50,
-    vida=150,
-    fuerza=35,
-    defensa=40,
-    velocidad=90,
-    movimientos=[Examen_dificil, Juicio_final, Conocimiento_profundo, Frikada]
-)
-
-p2 = PokemonRayo(
-    nombre="Jahn",
-    nivel=18,
-    vida=140,
-    fuerza=25,
-    defensa=17,
-    velocidad=180,
-    movimientos=[Disparo_rapido, Ocho_manos, Finta, Cafe_explosivo]
-)
+# Movimientos predefinidos
+MOVIMIENTOS = {
+    "Oscuridad": [
+        Movimiento("Examen_dificil", 30, PokemonOscuridad),
+        Movimiento("Juicio_final", 25, PokemonOscuridad),
+        Movimiento("Conocimiento_profundo", 20, PokemonOscuridad),
+        Movimiento("Frikada", 35, PokemonOscuridad),
+    ],
+    "Rayo": [
+        Movimiento("Disparo_rapido", 28, PokemonRayo),
+        Movimiento("Ocho_manos", 22, PokemonRayo),
+        Movimiento("Finta", 32, PokemonRayo),
+        Movimiento("Cafe_explosivo", 50, PokemonRayo),
+    ]
+}
 
 
-if __name__ == "__main__":
-    if p1.get_velocidad() >= p2.get_velocidad():
-        atacante, defensor = p1, p2
+@app.post("/pokemon")
+def crear_pokemon(data: dict):
+    nombre = data["nombre"]
+    tipo = data["tipo"]
+
+    if nombre in pokemons:
+        raise HTTPException(400, "El Pokémon ya existe")
+
+    if tipo == "Oscuridad":
+        pokemon = PokemonOscuridad(
+            nombre, 50, 150, 35, 40, 90, MOVIMIENTOS["Oscuridad"]
+        )
+    elif tipo == "Rayo":
+        pokemon = PokemonRayo(
+            nombre, 18, 140, 25, 17, 180, MOVIMIENTOS["Rayo"]
+        )
     else:
-        atacante, defensor = p2, p1
+        raise HTTPException(400, "Tipo no válido")
 
-    turno = 1
+    pokemons[nombre] = pokemon
+    return {"mensaje": f"{nombre} creado correctamente"}
 
-    while p1.get_vida() > 0 and p2.get_vida() > 0:
-        print(f"\n--- TURNO {turno} ---")
 
-        atacante.ejecutar_movimiento(defensor)
-        if defensor.get_vida() <= 0:
-            break
+@app.get("/pokemon")
+def listar_pokemon():
+    return list(pokemons.keys())
 
-        defensor.ejecutar_movimiento(atacante)
-        turno += 1
+
+@app.post("/combate/iniciar")
+def iniciar_combate(data: dict):
+    global combate_actual
+
+    p1 = pokemons.get(data["pokemon1"])
+    p2 = pokemons.get(data["pokemon2"])
+
+    if not p1 or not p2:
+        raise HTTPException(404, "Pokemon no encontrado")
+
+    combate_actual = Combate(p1, p2)
+    return {"mensaje": "Combate iniciado"}
+
+
+@app.post("/combate/turno")
+def ejecutar_turno():
+    if combate_actual is None:
+        raise HTTPException(400, "No hay combate activo")
+
+    return combate_actual.turno()
