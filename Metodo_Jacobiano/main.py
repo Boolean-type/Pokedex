@@ -1,16 +1,15 @@
-import os
-import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Literal
-
-from Metodo_Jacobiano.poke_jacobiano import (
+from .pokemon_persistence import load_pokemons, save_pokemon
+from .poke_jacobiano import (
     PokemonOscuridad,
     PokemonRayo,
     Combate,
-    Pokemon,      # ← necesario para from_dict
-    MOVIMIENTOS
+    Pokemon,
+    MOVIMIENTOS,
+    TIPOS_PERMITIDOS,
 )
+
 
 app = FastAPI()
 
@@ -18,44 +17,23 @@ pokemons: dict[str, Pokemon] = {}
 combate_actual: Combate | None = None
 
 
-# ==================== MODELOS PYDANTIC ====================
 class PokemonCreate(BaseModel):
     nombre: str
-    tipo: Literal["Oscuridad", "Rayo"]
+    tipo: str          # ← ahora es str + validamos con lista
 
 
 class IniciarCombate(BaseModel):
     pokemon1: str
     pokemon2: str
 
-
-# ==================== PERSISTENCIA ====================
-def save_pokemon_to_json(pokemon: Pokemon):
-    """Guarda/actualiza el Pokémon en pokemons.json"""
-    data = pokemon.to_dict()
-    file_path = "pokemons.json"
-
-    # Leer datos existentes
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as f:
-            pokemons_data = json.load(f)
-    else:
-        pokemons_data = {}
-
-    pokemons_data[data["nombre"]] = data
-
-    # Guardar
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(pokemons_data, f, indent=4, ensure_ascii=False)
-
-
-
-
 # ==================== ENDPOINTS ====================
 @app.post("/pokemon")
 def crear_pokemon(pokemon: PokemonCreate):
     if pokemon.nombre in pokemons:
         raise HTTPException(status_code=400, detail="El Pokémon ya existe")
+
+    if pokemon.tipo not in TIPOS_PERMITIDOS:
+        raise HTTPException(status_code=400, detail="Tipo no válido")
 
     if pokemon.tipo == "Oscuridad":
         p = PokemonOscuridad(
@@ -66,8 +44,8 @@ def crear_pokemon(pokemon: PokemonCreate):
             pokemon.nombre, 18, 140, 25, 17, 180, MOVIMIENTOS["Rayo"]
         )
 
-    pokemons[pokemon.nombre] = p
-    save_pokemon_to_json(p)                     # ← Aquí se guarda en JSON
+ 
+    save_pokemon(p)                     # ← guarda en JSON
 
     return {"mensaje": f"{pokemon.nombre} creado correctamente"}
 

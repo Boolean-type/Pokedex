@@ -144,3 +144,4 @@ MOVIMIENTOS = {
         Movimiento("Cafe_explosivo", 50, PokemonRayo),
     ]
 }
+TIPOS_PERMITIDOS = ["Oscuridad", "Rayo"]
