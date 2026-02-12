@@ -49,18 +49,6 @@ def save_pokemon_to_json(pokemon: Pokemon):
         json.dump(pokemons_data, f, indent=4, ensure_ascii=False)
 
 
-@app.on_event("startup")
-async def load_pokemons():
-    """Carga todos los Pokémon guardados al iniciar la API"""
-    global pokemons
-    file_path = "pokemons.json"
-
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        for nombre, p_data in data.items():
-            pokemons[nombre] = Pokemon.from_dict(p_data)
 
 
 # ==================== ENDPOINTS ====================
